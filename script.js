@@ -1,42 +1,18 @@
-const $ = (id) => document.getElementById(id);
-let running = false, power = 0, speed = 0, distance = 1.2, elapsed = 0, timer;
-const labels = ['B2','B1','N','P1','P2','P3','P4'];
-const speedEl = $('speed'), distanceEl = $('distance'), powerLabel = $('powerLabel');
-
-function setPower(value) {
-  power = Number(value);
-  document.querySelectorAll('.lever-notch').forEach((button) => button.classList.toggle('active', Number(button.dataset.power) === power));
-  $('lever').style.left = `${((power + 2) / 6) * 100}%`;
-  powerLabel.textContent = labels[power + 2];
-  $('viewMessage').textContent = power < 0 ? '制動中　｜　速度を安全に下げています' : power > 0 ? '力行中　｜　目標速度を超えないよう注意' : '惰行中　｜　このまま速度を維持';
-}
-
-function update() {
-  if (!running) return;
-  const acceleration = power > 0 ? power * 0.16 : power < 0 ? power * 0.48 : -0.015;
-  speed = Math.max(0, Math.min(120, speed + acceleration));
-  distance = Math.max(0, distance - speed / 360000);
-  elapsed += 1;
-  speedEl.textContent = Math.round(speed);
-  distanceEl.textContent = distance.toFixed(2);
-  $('needle').style.transform = `rotate(${speed * 2.15 - 45}deg)`;
-  $('targetBar').style.width = `${Math.min(100, speed / 45 * 100)}%`;
-  $('distanceBar').style.width = `${Math.max(0, distance / 1.2 * 100)}%`;
-  $('status').textContent = speed > 49 ? '速度超過' : speed > 1 ? '走行中' : '停車中';
-  $('statusDetail').textContent = speed > 49 ? '目標速度を下げてください' : speed > 1 ? (power < 0 ? '減速しています' : '定刻運転中') : '出発準備完了';
-  $('statusDot').style.background = speed > 49 ? 'var(--red)' : 'var(--green)';
-  const base = 7 * 3600 + 42 * 60 + elapsed;
-  const hh = String(Math.floor(base / 3600) % 24).padStart(2,'0'), mm = String(Math.floor(base / 60) % 60).padStart(2,'0'), ss = String(base % 60).padStart(2,'0');
-  $('clock').textContent = `${hh}:${mm}:${ss}`;
-  if (distance <= 0) finish();
-}
-
-function start() { if (running) return; running = true; $('start').classList.add('active'); $('start').innerHTML = '<span>Ⅱ</span>運転中'; $('viewMessage').textContent = '出発進行！　｜　目標速度 45 km/h'; timer = setInterval(update, 100); }
-function finish() { running = false; clearInterval(timer); setPower(-2); $('start').classList.remove('active'); $('start').innerHTML = '<span>↻</span>もう一度運転'; $('score').textContent = `運転評価　${speed < 5 ? 'A' : 'B'}`; $('viewMessage').textContent = '港町駅に到着しました　｜　お疲れさまでした'; }
-document.querySelectorAll('.lever-notch').forEach((button) => button.addEventListener('click', () => { if (!running) start(); setPower(button.dataset.power); }));
-$('start').addEventListener('click', () => { if (running) return; if (distance <= 0) { distance = 1.2; speed = 0; elapsed = 0; } start(); });
-$('brake').addEventListener('click', () => setPower(-2));
-$('horn').addEventListener('click', () => { $('viewMessage').textContent = 'ポーーーッ！　｜　警笛を鳴らしました'; document.body.classList.add('flash'); setTimeout(() => document.body.classList.remove('flash'), 160); });
-$('sound').addEventListener('click', (event) => { const on = event.currentTarget.getAttribute('aria-pressed') === 'true'; event.currentTarget.setAttribute('aria-pressed', String(!on)); event.currentTarget.textContent = on ? 'SOUND OFF' : 'SOUND ON'; });
-document.addEventListener('keydown', (event) => { if (event.code === 'Space') { event.preventDefault(); $('horn').click(); } const keys = {'1':-2,'2':-1,'3':0,'4':1,'5':2,'6':3,'7':4}; if (keys[event.key] !== undefined) { if (!running) start(); setPower(keys[event.key]); } });
-setPower(0);
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js';
+const $=id=>document.getElementById(id); let running=false,power=0,speed=0,distance=1.2,elapsed=0,timer;
+const labels=['B2','B1','N','P1','P2','P3','P4'];
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x071321); scene.fog=new THREE.Fog(0x071321,32,180);
+const camera=new THREE.PerspectiveCamera(68,1,.1,300); camera.position.set(0,2.5,4); camera.rotation.x=-.08;
+const renderer=new THREE.WebGLRenderer({canvas:$('threeCanvas'),antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); scene.add(new THREE.HemisphereLight(0x8fa9c0,0x172132,1.3)); const moon=new THREE.DirectionalLight(0xaacbff,1.6); moon.position.set(-20,30,10); scene.add(moon);
+const mats={ground:new THREE.MeshStandardMaterial({color:0x162832}),rail:new THREE.MeshStandardMaterial({color:0x87949a,metalness:.8,roughness:.3}),sleeper:new THREE.MeshStandardMaterial({color:0x73553c}),city:new THREE.MeshStandardMaterial({color:0x132739}),pole:new THREE.MeshStandardMaterial({color:0x242c31}),signal:new THREE.MeshBasicMaterial({color:0x68e2a2})};
+const box=(w,h,d,mat,x,y,z,track=false)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.userData.track=track;scene.add(m);return m};
+box(120,.2,220,mats.ground,0,-.18,-75); for(let z=-8;z>-190;z-=8){box(.16,.12,8,mats.rail,-1.2,.08,z,true);box(.16,.12,8,mats.rail,1.2,.08,z,true);box(3,.12,.55,mats.sleeper,0,0,z,true)}
+for(let z=-12;z>-150;z-=13){const h=5+Math.random()*13;box(4+Math.random()*5,h,5,mats.city,-12,h/2-.1,z,true);box(4+Math.random()*6,h*.8,5,mats.city,12,h*.4-.1,z-4,true)}
+for(let z=-15;z>-170;z-=10){box(.7,7,.5,mats.pole,-5,3.5,z,true);box(.7,7,.5,mats.pole,5,3.5,z,true);box(4.5,.35,.45,mats.pole,0,7,z,true)}
+const lamp=box(.45,.45,.25,mats.signal,-5,5.6,-28);const lampLight=new THREE.PointLight(0x68e2a2,3,18);lampLight.position.set(-5,5.6,-28);scene.add(lampLight);
+function resize(){const r=$('threeCanvas').getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
+function animate(){requestAnimationFrame(animate);const drift=running?speed*.002:0;scene.traverse(o=>{if(o.userData.track){o.position.z+=drift;if(o.position.z>8)o.position.z-=180}});renderer.render(scene,camera)}animate();
+function setPower(v){power=Number(v);document.querySelectorAll('.lever-notch').forEach(b=>b.classList.toggle('active',Number(b.dataset.power)===power));$('lever').style.left=`${((power+2)/6)*100}%`;$('powerLabel').textContent=labels[power+2];$('viewMessage').textContent=power<0?'制動中　｜　速度を安全に下げています':power>0?'力行中　｜　目標速度を超えないよう注意':'惰行中　｜　このまま速度を維持'}
+function update(){if(!running)return;const a=power>0?power*.16:power<0?power*.48:-.015;speed=Math.max(0,Math.min(120,speed+a));distance=Math.max(0,distance-speed/360000);elapsed++;$('speed').textContent=Math.round(speed);$('distance').textContent=distance.toFixed(2);$('needle').style.transform=`rotate(${speed*2.15-45}deg)`;$('targetBar').style.width=`${Math.min(100,speed/45*100)}%`;$('distanceBar').style.width=`${Math.max(0,distance/1.2*100)}%`;$('status').textContent=speed>49?'速度超過':speed>1?'走行中':'停車中';$('statusDetail').textContent=speed>49?'目標速度を下げてください':speed>1?(power<0?'減速しています':'定刻運転中'):'出発準備完了';const base=7*3600+42*60+elapsed,hh=String(Math.floor(base/3600)%24).padStart(2,'0'),mm=String(Math.floor(base/60)%60).padStart(2,'0'),ss=String(base%60).padStart(2,'0');$('clock').textContent=`${hh}:${mm}:${ss}`;if(distance<=0)finish()}
+function start(){if(running)return;running=true;$('start').classList.add('active');$('start').innerHTML='<span>Ⅱ</span>運転中';$('viewMessage').textContent='出発進行！　｜　目標速度 45 km/h';timer=setInterval(update,100)}function finish(){running=false;clearInterval(timer);setPower(-2);$('start').classList.remove('active');$('start').innerHTML='<span>↻</span>もう一度運転';$('score').textContent=`運転評価　${speed<5?'A':'B'}`;$('viewMessage').textContent='港町駅に到着しました　｜　お疲れさまでした'}
+document.querySelectorAll('.lever-notch').forEach(b=>b.addEventListener('click',()=>{if(!running)start();setPower(b.dataset.power)}));$('start').addEventListener('click',()=>{if(running)return;if(distance<=0){distance=1.2;speed=0;elapsed=0}start()});$('brake').addEventListener('click',()=>setPower(-2));$('horn').addEventListener('click',()=>{$('viewMessage').textContent='ポーーーッ！　｜　警笛を鳴らしました'});$('sound').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')==='true';e.currentTarget.setAttribute('aria-pressed',String(!on));e.currentTarget.textContent=on?'SOUND OFF':'SOUND ON'});document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();$('horn').click()}const keys={'1':-2,'2':-1,'3':0,'4':1,'5':2,'6':3,'7':4};if(keys[e.key]!==undefined){if(!running)start();setPower(keys[e.key])}});setPower(0);

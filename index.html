@@ -15,11 +15,9 @@
       <button id="sound" class="sound" type="button" aria-pressed="true">SOUND ON</button>
     </header>
 
-    <section class="view-panel" aria-label="運転席から見える景色">
-      <div class="sky"><span class="moon"></span><span class="cloud cloud-a"></span><span class="cloud cloud-b"></span></div>
-      <div class="city"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="track"><span class="rail rail-left"></span><span class="rail rail-right"></span><span class="sleeper s1"></span><span class="sleeper s2"></span><span class="sleeper s3"></span><span class="sleeper s4"></span><span class="sleeper s5"></span></div>
-      <div class="signal"><span id="signalLamp"></span><small>S-04</small></div>
+    <section class="view-panel" aria-label="運転席から見える3D景色">
+      <canvas id="threeCanvas"></canvas>
+      <div class="three-badge">3D CAB VIEW <span>WEBGL</span></div>
       <div id="viewMessage" class="view-message">出発信号：青　｜　定刻運転を開始してください</div>
     </section>
 
@@ -36,6 +34,6 @@
     </section>
     <footer><span>操作：主幹制御器を選択　/　速度を目標に合わせて駅に停車</span><span id="score">運転評価　—</span></footer>
   </main>
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
