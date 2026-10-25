@@ -2,11 +2,14 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.m
 const $=id=>document.getElementById(id); let running=false,power=0,speed=0,distance=1.2,elapsed=0,timer;
 const labels=['B2','B1','N','P1','P2','P3','P4'];
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x071321); scene.fog=new THREE.Fog(0x071321,32,180);
-const camera=new THREE.PerspectiveCamera(68,1,.1,300); camera.position.set(0,2.5,4); camera.rotation.x=-.08;
+const camera=new THREE.PerspectiveCamera(68,1,.1,300); camera.position.set(0,2.35,3.4); camera.rotation.x=-.07;
 const renderer=new THREE.WebGLRenderer({canvas:$('threeCanvas'),antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); scene.add(new THREE.HemisphereLight(0x8fa9c0,0x172132,1.3)); const moon=new THREE.DirectionalLight(0xaacbff,1.6); moon.position.set(-20,30,10); scene.add(moon);
 const mats={ground:new THREE.MeshStandardMaterial({color:0x162832}),rail:new THREE.MeshStandardMaterial({color:0x87949a,metalness:.8,roughness:.3}),sleeper:new THREE.MeshStandardMaterial({color:0x73553c}),city:new THREE.MeshStandardMaterial({color:0x132739}),pole:new THREE.MeshStandardMaterial({color:0x242c31}),signal:new THREE.MeshBasicMaterial({color:0x68e2a2})};
 const box=(w,h,d,mat,x,y,z,track=false)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.userData.track=track;scene.add(m);return m};
 box(120,.2,220,mats.ground,0,-.18,-75); for(let z=-8;z>-190;z-=8){box(.16,.12,8,mats.rail,-1.2,.08,z,true);box(.16,.12,8,mats.rail,1.2,.08,z,true);box(3,.12,.55,mats.sleeper,0,0,z,true)}
+const cabMat=new THREE.MeshStandardMaterial({color:0x0d1822,metalness:.2,roughness:.7}); const frameMat=new THREE.MeshStandardMaterial({color:0x263844,metalness:.45,roughness:.35});
+box(8,.3,.5,cabMat,0,5.2,2.9); box(.35,4.8,.5,frameMat,-4,2.75,2.9); box(.35,4.8,.5,frameMat,4,2.75,2.9); box(8,.3,.5,frameMat,0,.35,2.9); box(.3,5,3,cabMat,-4.3,2.8,1.4); box(.3,5,3,cabMat,4.3,2.8,1.4); box(8,.3,3,cabMat,0,5.3,1.4);
+const windshield=new THREE.Mesh(new THREE.PlaneGeometry(7.5,4.5),new THREE.MeshBasicMaterial({color:0x4b788a,transparent:true,opacity:.06,side:THREE.DoubleSide})); windshield.position.set(0,2.8,2.72); windshield.rotation.y=Math.PI; scene.add(windshield);
 for(let z=-12;z>-150;z-=13){const h=5+Math.random()*13;box(4+Math.random()*5,h,5,mats.city,-12,h/2-.1,z,true);box(4+Math.random()*6,h*.8,5,mats.city,12,h*.4-.1,z-4,true)}
 for(let z=-15;z>-170;z-=10){box(.7,7,.5,mats.pole,-5,3.5,z,true);box(.7,7,.5,mats.pole,5,3.5,z,true);box(4.5,.35,.45,mats.pole,0,7,z,true)}
 const lamp=box(.45,.45,.25,mats.signal,-5,5.6,-28);const lampLight=new THREE.PointLight(0x68e2a2,3,18);lampLight.position.set(-5,5.6,-28);scene.add(lampLight);
