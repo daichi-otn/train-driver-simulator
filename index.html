@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
+  <title>TRAIN DRIVER // 夜間運転シミュレーター</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="cab">
+    <header class="topbar">
+      <div class="brand"><span class="brand-line"></span><div><p>TRAIN DRIVER</p><small>METROPOLITAN LINE · SERVICE 07</small></div></div>
+      <div class="route"><span>運転区間</span><strong>新都心 → 港町</strong></div>
+      <button id="sound" class="sound" type="button" aria-pressed="true">SOUND ON</button>
+    </header>
+
+    <section class="view-panel" aria-label="運転席から見える景色">
+      <div class="sky"><span class="moon"></span><span class="cloud cloud-a"></span><span class="cloud cloud-b"></span></div>
+      <div class="city"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="track"><span class="rail rail-left"></span><span class="rail rail-right"></span><span class="sleeper s1"></span><span class="sleeper s2"></span><span class="sleeper s3"></span><span class="sleeper s4"></span><span class="sleeper s5"></span></div>
+      <div class="signal"><span id="signalLamp"></span><small>S-04</small></div>
+      <div id="viewMessage" class="view-message">出発信号：青　｜　定刻運転を開始してください</div>
+    </section>
+
+    <section class="dashboard">
+      <div class="instrument speedometer"><span class="label">SPEED</span><strong><b id="speed">0</b><em>km/h</em></strong><div class="speed-ring"><i id="needle"></i></div><div class="speed-scale"><span>0</span><span>40</span><span>80</span><span>120</span></div></div>
+      <div class="info-stack"><div class="info-card"><span>目標速度</span><strong><b id="target">45</b> km/h</strong><div class="progress"><i id="targetBar"></i></div></div><div class="info-card"><span>港町駅まで</span><strong><b id="distance">1.20</b> km</strong><div class="station-line"><i id="distanceBar"></i></div></div><div class="status-card"><span id="statusDot"></span><b id="status">停車中</b><small id="statusDetail">出発準備完了</small></div></div>
+      <div class="clock"><span>時刻</span><strong id="clock">07:42:00</strong><small>2026.10.25 SUN</small></div>
+    </section>
+
+    <section class="controls" aria-label="運転操作">
+      <div class="lever-panel"><div class="lever-label"><span>主幹制御器</span><b id="powerLabel">N</b></div><div class="lever-track"><button class="lever-notch" data-power="-2">B2</button><button class="lever-notch" data-power="-1">B1</button><button class="lever-notch active" data-power="0">N</button><button class="lever-notch" data-power="1">P1</button><button class="lever-notch" data-power="2">P2</button><button class="lever-notch" data-power="3">P3</button><button class="lever-notch" data-power="4">P4</button><div id="lever" class="lever"></div></div><p>← 制動　　惰行　　力行 →</p></div>
+      <div class="action-panel"><button id="horn" class="action-button horn" type="button"><span>♬</span>警笛<small>SPACE</small></button><button id="brake" class="action-button emergency" type="button"><span>■</span>非常ブレーキ<small>即時停止</small></button></div>
+      <button id="start" class="start-button" type="button"><span>▶</span>運転開始</button>
+    </section>
+    <footer><span>操作：主幹制御器を選択　/　速度を目標に合わせて駅に停車</span><span id="score">運転評価　—</span></footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
